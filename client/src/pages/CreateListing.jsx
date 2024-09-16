@@ -29,24 +29,29 @@ export default function CreateListing() {
 
     console.log(formData);
     
-    const handleImageSubmit = (e) => {
+    const handleImageSubmit = () => {
         if(files.length > 0 && files.length + formData.imageUrls.length < 7){
             setUploading(true);
             setImageUploadError(false);
-            const promises = [];
+
+            //multiple images  will be uploaded. so we need to waiy for multiple asynchronous operations to
+            //happen. so multiple promises should be resolved before proceeding.
+            //in promises array there will be multiple promises for each file.
+             const promises = [];
 
             for(let i=0; i<files.length; i++){
-                promises.push(storeImage(files[i]))
+                promises.push(storeImage(files[i]));
             }
             Promise.all(promises).then((urls) => {
-                setFormData({...formData, imageUrls: formData.imageUrls.concat(urls)});
+                setFormData({...formData, imageUrls: formData.imageUrls.concat(urls), 
+                });
                 setImageUploadError(false);
                 setUploading(false);
                 
-            }).catch((err) => {
+            }).catch(() => {
                 setImageUploadError('Image upload failed (2 mb max per image')
                 setUploading(false);
-            })
+            }); 
         }else{
             setImageUploadError('You can only upload 6 images per listing')
             setUploading(false);
@@ -56,11 +61,11 @@ export default function CreateListing() {
     const storeImage = async (file) => {
         return new Promise((resolve, reject) => {
             const storage = getStorage(app);
-            const fileName = new Date().getTime()+file.name
+            const fileName = new Date().getTime() + file.name //adding date and time to make tha file nane unique. 
             const storageRef = ref(storage, fileName);
             const uploadTask = uploadBytesResumable(storageRef, file);
             uploadTask.on(
-                "state_changed",
+                'state_changed',
                 (snapshot) => {
                     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                     console.log("Upload is "+ progress +"% completed");
@@ -109,7 +114,7 @@ export default function CreateListing() {
             if(formData.imageUrls.length < 1){
                 return setError('You must upload atleast one image')
             }
-            if(formData.regularPrice < +formData.discountPrice){
+            if(+formData.regularPrice < +formData.discountPrice){
                 return setError('Discount price must be lower than regular price')
             }
             setLoading(true);
@@ -121,7 +126,7 @@ export default function CreateListing() {
                 },
                 body: JSON.stringify({
                     ...formData,
-                    userRef:currentUser._id
+                    userRef:currentUser._id,
                 }),
             })
             const data = await res.json();
@@ -129,7 +134,7 @@ export default function CreateListing() {
             if(data.success === false){
                 setError(data.message)
             }
-            navigate(`/listing/${data._id}`)
+            navigate(`/listing/${data._id}`);
 
         }catch(err){
             setError(err.message);

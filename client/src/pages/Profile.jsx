@@ -21,6 +21,7 @@ export default function Profile() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
   const [formData, setFormData] = useState({});
+  const [showListingsError, setShowListingsError] = useState(false);
  
   const dispatch = useDispatch();
   
@@ -115,6 +116,26 @@ export default function Profile() {
     }
   }
 
+  const handleShowListings = async () => {
+    try{
+      setShowListingsError(false);
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      console.log(currentUser._id);
+      
+      const data = await res.json();
+  
+      
+      if(data.success === false){
+        setShowListingsError(true);
+        return;
+      }
+      console.log(data);
+      
+    }catch(err){
+      setShowListingsError(true);
+    }
+  }
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -180,6 +201,8 @@ export default function Profile() {
 
       <p className="text-red-700 mt-5 bold">{error ? error : ''}</p>    
       <p className="text-green-700 mt-5 bold">{updateSuccess ? "User is updated successfully" : ''}</p>    
+      <button className="text-green-700 w-full" onClick={handleShowListings}>Show Listings</button>
+      <p className="text-red-700 mt-5">{showListingsError ? 'Error Showing Listings' : ''}</p>
       
       
 
