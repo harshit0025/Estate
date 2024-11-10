@@ -6,10 +6,12 @@ export default defineConfig({
   server:{
     proxy: {
       '/api/': {
-        target: 'https://estate-udn5.onrender.com',
+        target: 'https://localhost:3000',
         secure: false,
       },
     },
   },
   plugins: [react()],
 })
+
+// https://estate-udn5.onrender.com
